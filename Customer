@@ -1,1 +1,11 @@
+customerId
+name
+email
+password
+orderHistory (List<Order>)
 
+Functions:
+
+register()
+login()
+viewOrderHistory()
