@@ -1,0 +1,9 @@
+List<Product> products
+
+Functions:
+
+addProduct()
+editProduct()
+deleteProduct()
+searchByName()
+filterByCategory()
