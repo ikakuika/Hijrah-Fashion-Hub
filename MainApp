@@ -1,0 +1,12 @@
+package com.ecommerce.localshop;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import java.io.*;
+import java.util.ArrayList;
+/**
+* PROJECT: BICS 1304 Group Project (A2 Response)
+* MISSION: Supporting Local Organizations [cite: 10]
+*/
