@@ -1,0 +1,10 @@
+User (Parent class)
+id
+name
+email
+password
+
+👉 Then:
+
+Customer extends User
+Admin extends User
