@@ -1,0 +1,8 @@
+List<CartItem> items
+
+Functions:
+
+addItem(Product)
+removeItem(Product)
+calculateTotal()
+clearCart()
