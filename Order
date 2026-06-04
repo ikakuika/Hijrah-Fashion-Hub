@@ -1,0 +1,10 @@
+orderId
+Customer customer
+List<CartItem> items
+totalPrice
+date
+
+Functions:
+
+generateInvoice()
+calculateTotal()
