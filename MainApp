@@ -1,12 +1,36 @@
-package com.ecommerce.localshop;
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-import java.io.*;
-import java.util.ArrayList;
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+
 /**
-* PROJECT: BICS 1304 Group Project (A2 Response)
-* MISSION: Supporting Local Organizations [cite: 10]
-*/
+ *
+ * @author user
+ */
+public class MainApp {
+    @Override
+    public void start(Stage stage) {
+
+        
+        showLogin(stage);
+    }
+
+    private void showLogin(Stage stage) {
+
+        Button adminBtn = new Button("Admin Login");
+        Button customerBtn = new Button("Customer Login");
+
+        adminBtn.setOnAction(e -> {
+            new AdminController().start(stage);  
+        });
+
+        customerBtn.setOnAction(e -> {
+            new CustomerController().start(stage); 
+        });
+
+        VBox root = new VBox(adminBtn, customerBtn);
+        stage.setScene(new Scene(root, 300, 200));
+        stage.show();
+    }
+    
+}
