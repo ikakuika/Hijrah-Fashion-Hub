@@ -1,36 +1,25 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+package com.mycompany.hijrahfashionhub;
 
-/**
- *
- * @author user
- */
-public class MainApp {
-    @Override
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+public class AdminController {
+
     public void start(Stage stage) {
 
-        
-        showLogin(stage);
-    }
+        Button addProduct = new Button("Add Product");
+        Button editProduct = new Button("Edit Product");
+        Button viewOrders = new Button("View Orders");
 
-    private void showLogin(Stage stage) {
+        VBox root = new VBox(10, addProduct, editProduct, viewOrders);
+        root.setAlignment(Pos.CENTER);
 
-        Button adminBtn = new Button("Admin Login");
-        Button customerBtn = new Button("Customer Login");
-
-        adminBtn.setOnAction(e -> {
-            new AdminController().start(stage);  
-        });
-
-        customerBtn.setOnAction(e -> {
-            new CustomerController().start(stage); 
-        });
-
-        VBox root = new VBox(adminBtn, customerBtn);
         stage.setScene(new Scene(root, 300, 200));
-        stage.show();
+        stage.setTitle("Admin Dashboard");
     }
+}
     
 }
