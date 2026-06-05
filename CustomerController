@@ -1,12 +1,23 @@
-public class CustomerController {
+package com.mycompany.hijrahfashionhub;
+
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+public class AdminController {
 
     public void start(Stage stage) {
-        VBox root = new VBox();
 
-        Button browse = new Button("Browse Products");
+        Button addProduct = new Button("Add Product");
+        Button editProduct = new Button("Edit Product");
+        Button viewOrders = new Button("View Orders");
 
-        root.getChildren().add(browse);
+        VBox root = new VBox(10, addProduct, editProduct, viewOrders);
+        root.setAlignment(Pos.CENTER);
 
         stage.setScene(new Scene(root, 300, 200));
+        stage.setTitle("Admin Dashboard");
     }
 }
