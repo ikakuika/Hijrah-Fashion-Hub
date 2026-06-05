@@ -1,1 +1,12 @@
-//Handles UI actions for customer Connects UI → logic
+public class CustomerController {
+
+    public void start(Stage stage) {
+        VBox root = new VBox();
+
+        Button browse = new Button("Browse Products");
+
+        root.getChildren().add(browse);
+
+        stage.setScene(new Scene(root, 300, 200));
+    }
+}
