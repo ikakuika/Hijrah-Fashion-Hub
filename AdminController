@@ -1,1 +1,12 @@
-// Add/Edit/Delete products UI logic View orders UI logic
+public class AdminController {
+
+    public void start(Stage stage) {
+        VBox root = new VBox();
+
+        Button addProduct = new Button("Add Product");
+
+        root.getChildren().add(addProduct);
+
+        stage.setScene(new Scene(root, 300, 200));
+    }
+}
