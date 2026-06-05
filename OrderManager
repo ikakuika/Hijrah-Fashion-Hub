@@ -1,7 +1,0 @@
-List<Order> allOrders
-
-Functions:
-
-placeOrder()
-viewAllOrders() (admin)
-getOrderHistory(customer)
