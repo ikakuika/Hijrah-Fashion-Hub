@@ -1,1 +1,8 @@
-thrown when stock = 0
+package javafxhijrahfashionhub;
+
+
+class OutOfStockException extends Exception {
+    public OutOfStockException(String message) {
+        super(message);
+    }
+}
