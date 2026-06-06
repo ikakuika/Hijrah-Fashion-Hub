@@ -1,11 +1,17 @@
-customerId
-name
-email
-password
-orderHistory (List<Order>)
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package javafxhijrahfashionhub;
 
-Functions:
+class Customer extends User {
 
-register()
-login()
-viewOrderHistory()
+    public Customer(String name, String email, String password) {
+        super(name, email, password);
+    }
+
+    @Override
+    public void showDashboard() {
+        System.out.println("Welcome Customer: " + getName());
+    }
+}
