@@ -1,1 +1,16 @@
-//productId-name-category (hijab / jubah / abaya / telekung)-price-stock-Functions:-updateStock()-getDetails()
+package javafxhijrahfashionhub;
+
+public class Product extends ShopItem {
+
+    private String category;
+
+    public Product(String name, String category, double price) {
+        super(name, price);
+        this.category = category;
+    }
+
+    @Override
+    public String getCategory() {
+        return category;
+    }
+}
