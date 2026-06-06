@@ -1,1 +1,13 @@
-//Admin adminUsername password (hardcoded/file-based) Functions: login()
+package javafxhijrahfashionhub;
+
+class Admin extends User {
+
+    public Admin(String name, String email, String password) {
+        super(name, email, password);
+    }
+
+    @Override
+    public void showDashboard() {
+        System.out.println("Admin Panel Access Granted");
+    }
+}
