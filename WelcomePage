@@ -1,0 +1,24 @@
+
+package javafxhijrahfashionhub;
+
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.geometry.Pos;
+import javafx.stage.Stage;
+
+public class WelcomePage {
+
+    public Scene createScene(Stage stage) {
+
+        Label title = new Label("HIJRAH FASHION HUB");
+
+        Button enterBtn = new Button("Enter Store");
+
+        VBox root = new VBox(20, title, enterBtn);
+        root.setAlignment(Pos.CENTER);
+
+        return new Scene(root, 900, 450);
+    }
+}
+
