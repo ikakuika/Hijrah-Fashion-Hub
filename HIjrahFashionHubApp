@@ -9,48 +9,44 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class HijrahFashionHubApp extends Application {
 
     private Stage primaryStage;
 
-    private Scene loginScene, registerScene, homeScene, shopScene, adminScene, receiptScene;
-
+    // USERS
     private final Map<String, User> userRegistry = new HashMap<>();
     private User currentUser;
 
+    // PRODUCTS
     private final ObservableList<Product> products = FXCollections.observableArrayList();
     private final ObservableList<Product> cart = FXCollections.observableArrayList();
 
+    // TABLES
     private TableView<Product> productTable = new TableView<>();
     private TableView<Product> cartTable = new TableView<>();
 
-    private Label welcomeLabel = new Label();
     private Label totalLabel = new Label("Total: RM 0.00");
+    private Label welcomeLabel = new Label();
 
-    public static void main(String[] args) {
-        launch(args);
-    }
+    private Scene loginScene, registerScene, homeScene, shopScene, adminScene;
 
     @Override
     public void start(Stage stage) {
 
-        this.primaryStage = stage;
+        primaryStage = stage;
         stage.setTitle("Hijrah Fashion Hub");
 
-        // USERS
         userRegistry.put("admin", new Admin("admin", "123"));
         userRegistry.put("user", new Customer("user", "123"));
 
-        setupProducts();
+        setupProducts();   // ⭐ MUST CALL FIRST
 
         createLoginScene();
         createRegisterScene();
         createHomeScene();
         createShopScene();
-        createAdminScene();
 
         stage.setScene(loginScene);
         stage.show();
@@ -59,23 +55,30 @@ public class HijrahFashionHubApp extends Application {
     // ================= LOGIN =================
     private void createLoginScene() {
 
-        TextField username = new TextField();
-        username.setPromptText("Username");
-
-        PasswordField password = new PasswordField();
-        password.setPromptText("Password");
+        TextField u = new TextField();
+        PasswordField p = new PasswordField();
 
         Button login = new Button("Login");
         Button register = new Button("Register");
 
-        login.setOnAction(e -> handleLogin(username.getText(), password.getText()));
+        login.setOnAction(e -> {
+            if (userRegistry.containsKey(u.getText())
+                    && userRegistry.get(u.getText()).getPassword().equals(p.getText())) {
+
+                currentUser = userRegistry.get(u.getText());
+                welcomeLabel.setText("Welcome " + currentUser.getUsername());
+
+                primaryStage.setScene(homeScene);
+
+            } else {
+                alert("Login Failed", "Wrong username/password");
+            }
+        });
+
         register.setOnAction(e -> primaryStage.setScene(registerScene));
 
-        VBox root = new VBox(10, new Label("HIJRAH FASHION HUB"),
-                username, password, login, register);
-
+        VBox root = new VBox(10, new Label("LOGIN"), u, p, login, register);
         root.setAlignment(Pos.CENTER);
-        root.setStyle("-fx-background-color: #F5E6D3;");
 
         loginScene = new Scene(root, 400, 300);
     }
@@ -84,10 +87,7 @@ public class HijrahFashionHubApp extends Application {
     private void createRegisterScene() {
 
         TextField u = new TextField();
-        u.setPromptText("Username");
-
         PasswordField p = new PasswordField();
-        p.setPromptText("Password");
 
         ComboBox<String> role = new ComboBox<>();
         role.getItems().addAll("Customer", "Admin");
@@ -96,13 +96,21 @@ public class HijrahFashionHubApp extends Application {
         Button create = new Button("Create");
         Button back = new Button("Back");
 
-        create.setOnAction(e -> handleRegister(u.getText(), p.getText(), role.getValue()));
+        create.setOnAction(e -> {
+
+            if (role.getValue().equals("Admin")) {
+                userRegistry.put(u.getText(), new Admin(u.getText(), p.getText()));
+            } else {
+                userRegistry.put(u.getText(), new Customer(u.getText(), p.getText()));
+            }
+
+            alert("Success", "Account created");
+            primaryStage.setScene(loginScene);
+        });
+
         back.setOnAction(e -> primaryStage.setScene(loginScene));
 
-        VBox root = new VBox(10,
-                new Label("REGISTER"),
-                u, p, role, create, back);
-
+        VBox root = new VBox(10, new Label("REGISTER"), u, p, role, create, back);
         root.setAlignment(Pos.CENTER);
 
         registerScene = new Scene(root, 400, 300);
@@ -111,20 +119,18 @@ public class HijrahFashionHubApp extends Application {
     // ================= HOME =================
     private void createHomeScene() {
 
-        welcomeLabel = new Label();
-
-        Button shop = new Button("Shop");
+        Button shop = new Button("Customer Shop");
         Button admin = new Button("Admin Panel");
         Button logout = new Button("Logout");
 
-        shop.setOnAction(e -> primaryStage.setScene(shopScene));
+        shop.setOnAction(e -> {
+            refreshTable();   // ⭐ IMPORTANT FIX
+            primaryStage.setScene(shopScene);
+        });
 
         admin.setOnAction(e -> {
-            if (currentUser instanceof Admin) {
-                primaryStage.setScene(adminScene);
-            } else {
-                alert("Denied", "Admin only");
-            }
+            createAdminScene();
+            primaryStage.setScene(adminScene);
         });
 
         logout.setOnAction(e -> primaryStage.setScene(loginScene));
@@ -136,832 +142,265 @@ public class HijrahFashionHubApp extends Application {
     }
 
     // ================= SHOP =================
-    private void createShopScene() {
+    // ================= SHOP (CUSTOMER) =================
+private void createShopScene() {
 
-        setupTables();
+    setupTables();
 
-        Button add = new Button("Add");
-        Button remove = new Button("Remove");
-        Button checkout = new Button("Checkout");
+    TextField search = new TextField();
+    search.setPromptText("Search product...");
 
-        add.setOnAction(e -> {
-            Product p = productTable.getSelectionModel().getSelectedItem();
-            if (p != null) {
-                cart.add(p);
-                updateTotal();
-            }
-        });
+    ComboBox<String> category = new ComboBox<>();
+    category.getItems().addAll(
+            "All",
+            "Abaya",
+            "Hijab",
+            "Jubah",
+            "Set",
+            "Accessory"
+    );
+    category.setValue("All");
 
-        remove.setOnAction(e -> {
-            Product p = cartTable.getSelectionModel().getSelectedItem();
-            if (p != null) {
-                cart.remove(p);
-                updateTotal();
-            }
-        });
+    search.textProperty().addListener((obs, oldValue, newValue) ->
+            filter(newValue, category.getValue()));
 
-        checkout.setOnAction(e -> showReceipt());
+    category.setOnAction(e ->
+            filter(search.getText(), category.getValue()));
 
-        VBox left = new VBox(10, new Label("Products"), productTable, add);
-        VBox right = new VBox(10, new Label("Cart"), cartTable, remove, totalLabel, checkout);
+    Button add = new Button("Add to Cart");
+    Button remove = new Button("Remove");
+    Button checkout = new Button("Place Order");
+    Button back = new Button("Back");
 
-        HBox root = new HBox(20, left, right);
-        root.setAlignment(Pos.CENTER);
+    add.setOnAction(e -> {
 
-        shopScene = new Scene(root, 800, 500);
-    }
+        Product selected =
+                productTable.getSelectionModel().getSelectedItem();
+
+        if (selected != null) {
+            cart.add(selected);
+            updateTotal();
+        }
+    });
+
+    remove.setOnAction(e -> {
+
+        Product selected =
+                cartTable.getSelectionModel().getSelectedItem();
+
+        if (selected != null) {
+            cart.remove(selected);
+            updateTotal();
+        }
+    });
+
+    checkout.setOnAction(e -> {
+
+        if (cart.isEmpty()) {
+            alert("Empty", "Cart kosong");
+            return;
+        }
+
+        double total = cart.stream()
+                .mapToDouble(Product::getPrice)
+                .sum();
+
+        Order order = new Order(
+                currentUser.getUsername(),
+                new ArrayList<>(cart),
+                total
+        );
+
+        orders.add(order);
+
+        showInvoice(order);
+
+        cart.clear();
+        updateTotal();
+    });
+
+    back.setOnAction(e ->
+            primaryStage.setScene(homeScene));
+
+    VBox left = new VBox(
+            10,
+            search,
+            category,
+            productTable,
+            add
+    );
+
+    VBox right = new VBox(
+            10,
+            cartTable,
+            remove,
+            totalLabel,
+            checkout,
+            back
+    );
+
+    left.setPrefWidth(450);
+    right.setPrefWidth(350);
+
+    productTable.setPrefHeight(350);
+    cartTable.setPrefHeight(350);
+
+    HBox root = new HBox(20, left, right);
+    root.setPadding(new Insets(10));
+
+    shopScene = new Scene(root, 900, 500);
+}
 
     // ================= ADMIN =================
     private void createAdminScene() {
 
-    TableView<Product> table = new TableView<>();
-    table.setItems(products);
-
-    TableColumn<Product, String> n = new TableColumn<>("Name");
-    n.setCellValueFactory(new PropertyValueFactory<>("name"));
-
-    TableColumn<Product, String> c = new TableColumn<>("Category");
-    c.setCellValueFactory(new PropertyValueFactory<>("category"));
-
-    TableColumn<Product, Double> p = new TableColumn<>("Price");
-    p.setCellValueFactory(new PropertyValueFactory<>("price"));
-
-    table.getColumns().addAll(n, c, p);
-
-    TextField name = new TextField();
-    name.setPromptText("Name");
-
-    TextField cat = new TextField();
-    cat.setPromptText("Category");
-
-    TextField price = new TextField();
-    price.setPromptText("Price");
-
-    Button add = new Button("Add Product");
-    Button delete = new Button("Delete Product");
-    Button backButton = new Button("Back to Home");
-
-    // ✅ ADD PRODUCT
-    add.setOnAction(e -> {
-        try {
-            products.add(new Product(
-                    name.getText(),
-                    cat.getText(),
-                    Double.parseDouble(price.getText())
-            ));
-
-            name.clear();
-            cat.clear();
-            price.clear();
-
-        } catch (Exception ex) {
-            Alert a = new Alert(Alert.AlertType.ERROR);
-            a.setContentText("Invalid input");
-            a.show();
-        }
-    });
-
-    // ❌ DELETE PRODUCT
-    delete.setOnAction(e -> {
-        Product selected = table.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            products.remove(selected);
-        }
-    });
-
-    // 🔙 BACK BUTTON FIX
-    backButton.setOnAction(e ->
-            primaryStage.setScene(homeScene)   // atau loginScene kalau kau nak
-    );
-
-    VBox form = new VBox(10,
-            name,
-            cat,
-            price,
-            add,
-            delete,
-            backButton   // 🔥 IMPORTANT: ADD HERE
-    );
-
-    form.setAlignment(Pos.CENTER);
-
-    HBox root = new HBox(20, table, form);
-    root.setAlignment(Pos.CENTER);
-    root.setPadding(new Insets(10));
-
-    adminScene = new Scene(root, 800, 500);
-}
-
-    // ================= LOGIN LOGIC =================
-    private void handleLogin(String u, String p) {
-
-        if (userRegistry.containsKey(u)
-                && userRegistry.get(u).getPassword().equals(p)) {
-
-            currentUser = userRegistry.get(u);
-
-            welcomeLabel.setText("Welcome " + u);
-
-            primaryStage.setScene(homeScene);
-
-        } else {
-            alert("Login Failed", "Wrong credentials");
-        }
-    }
-
-    // ================= REGISTER LOGIC =================
-    private void handleRegister(String u, String p, String role) {
-
-        if (role.equals("Admin")) {
-            userRegistry.put(u, new Admin(u, p));
-        } else {
-            userRegistry.put(u, new Customer(u, p));
-        }
-
-        alert("Success", "Account created");
-        primaryStage.setScene(loginScene);
-    }
-
-    // ================= PRODUCTS =================
-    private void setupProducts() {
-
-        products.addAll(
-                new Product("Abaya", "Dress", 120),
-                new Product("Hijab", "Head", 45),
-                new Product("Jubah", "Dress", 150),
-                new Product("Bag", "Accessory", 60),
-                new Product("Shoes", "Fashion", 90),
-                new Product("Perfume", "Beauty", 70),
-                new Product("Gift Box", "Set", 200),
-                new Product("Scarf Pin", "Accessory", 15),
-                new Product("Prayer Set", "Set", 140),
-                new Product("Travel Set", "Set", 110),
-                new Product("Premium Hijab", "Head", 80),
-                new Product("Classic Jubah", "Dress", 95),
-                new Product("Fashion Bag", "Accessory", 65),
-                new Product("Scarf", "Accessory", 25),
-                new Product("Abaya Premium", "Dress", 180)
-        );
-    }
-
-    // ================= TABLE =================
-    private void setupTables() {
+        TableView<Product> table = new TableView<>();
+        table.setItems(products);
 
         TableColumn<Product, String> n = new TableColumn<>("Name");
         n.setCellValueFactory(new PropertyValueFactory<>("name"));
 
+        TableColumn<Product, String> c = new TableColumn<>("Category");
+        c.setCellValueFactory(new PropertyValueFactory<>("category"));
+
         TableColumn<Product, Double> p = new TableColumn<>("Price");
         p.setCellValueFactory(new PropertyValueFactory<>("price"));
 
-        productTable.setItems(products);
-        productTable.getColumns().setAll(n, p);
-
-        cartTable.setItems(cart);
-        cartTable.getColumns().setAll(n, p);
-    }
-
-    // ================= RECEIPT =================
-    private void showReceipt() {
-
-        double total = cart.stream().mapToDouble(Product::getPrice).sum();
-
-        Label r = new Label("RECEIPT");
-        Label t = new Label("Total: RM " + total);
-        Label thx = new Label("THANK YOU");
-
-        Button back = new Button("Back Home");
-        back.setOnAction(e -> {
-            cart.clear();
-            updateTotal();
-            primaryStage.setScene(homeScene);
-        });
-
-        VBox root = new VBox(10, r, t, thx, back);
-        root.setAlignment(Pos.CENTER);
-
-        receiptScene = new Scene(root, 400, 300);
-        primaryStage.setScene(receiptScene);
-    }
-
-    // ================= TOTAL =================
-    private void updateTotal() {
-        double total = cart.stream().mapToDouble(Product::getPrice).sum();
-        totalLabel.setText("Total: RM " + total);
-    }
-
-    // ================= ALERT =================
-    private void alert(String t, String m) {
-        Alert a = new Alert(Alert.AlertType.INFORMATION);
-        a.setTitle(t);
-        a.setContentText(m);
-        a.show();
-    }
-}    @Override
-    public void start(Stage primaryStage) {
-
-        this.primaryStage = primaryStage;
-        primaryStage.setTitle("Hijrah Fashion Hub");
-
-        // default users
-        userRegistry.put("customer1", new Customer("customer1", "123"));
-        userRegistry.put("admin1", new Admin("admin1", "admin"));
-
-        setupProducts();
-
-        createLoginScene();
-        createRegisterScene();
-        createHomeScene();
-        createShopScene();
-
-        primaryStage.setScene(loginScene);
-        primaryStage.show();
-    }
-
-    // ================= LOGIN =================
-    private void createLoginScene() {
-
-        Label title = new Label("HIJRAH FASHION HUB");
-
-        TextField username = new TextField();
-        username.setPromptText("Username");
-
-        PasswordField password = new PasswordField();
-        password.setPromptText("Password");
-
-        Button loginBtn = new Button("Login");
-        Button registerBtn = new Button("Register");
-
-        loginBtn.setOnAction(e -> handleLogin(username.getText(), password.getText()));
-        registerBtn.setOnAction(e -> primaryStage.setScene(registerScene));
-
-        VBox root = new VBox(10, title, username, password, loginBtn, registerBtn);
-        root.setAlignment(Pos.CENTER);
-        root.setStyle("-fx-background-color: #F5E6D3;");
-
-        loginScene = new Scene(root, 400, 300);
-    }
-
-    // ================= REGISTER =================
-    private void createRegisterScene() {
-
-        TextField username = new TextField();
-        username.setPromptText("Username");
-
-        PasswordField password = new PasswordField();
-        password.setPromptText("Password");
-
-        PasswordField confirm = new PasswordField();
-        confirm.setPromptText("Confirm Password");
-
-        ComboBox<String> role = new ComboBox<>();
-        role.getItems().addAll("Customer", "Admin");
-        role.setValue("Customer");
-
-        Button registerBtn = new Button("Create Account");
-        Button backBtn = new Button("Back");
-
-        registerBtn.setOnAction(e -> handleRegister(
-                username.getText(),
-                password.getText(),
-                confirm.getText(),
-                role.getValue()
-        ));
-
-        backBtn.setOnAction(e -> primaryStage.setScene(loginScene));
-
-        VBox root = new VBox(10,
-                new Label("REGISTER"),
-                username, password, confirm, role,
-                registerBtn, backBtn
-        );
-
-        root.setAlignment(Pos.CENTER);
-        root.setStyle("-fx-background-color: #FFF3E6;");
-
-        registerScene = new Scene(root, 400, 350);
-    }
-
-    // ================= HOME =================
-    private void createHomeScene() {
-
-        welcomeLabel = new Label();
-
-        Button shopBtn = new Button("Enter Shop");
-        Button logoutBtn = new Button("Logout");
-
-        shopBtn.setOnAction(e -> primaryStage.setScene(shopScene));
-        logoutBtn.setOnAction(e -> primaryStage.setScene(loginScene));
-
-        VBox root = new VBox(20, welcomeLabel, shopBtn, logoutBtn);
-        root.setAlignment(Pos.CENTER);
-
-        homeScene = new Scene(root, 400, 300);
-    }
-
-    // ================= SHOP =================
-    private void createShopScene() {
-
-        setupTables();
-
-        Button add = new Button("Add to Cart");
-        Button remove = new Button("Remove");
-        Button checkout = new Button("Checkout");
-
-        add.setOnAction(e -> addToCart());
-        remove.setOnAction(e -> removeFromCart());
-        checkout.setOnAction(e -> showReceipt());
-
-        VBox left = new VBox(10, new Label("Products"), productTable, add);
-        VBox right = new VBox(10, new Label("Cart"), cartTable, remove, totalLabel, checkout);
-
-        HBox root = new HBox(30, left, right);
-        root.setAlignment(Pos.CENTER);
-        root.setPadding(new Insets(10));
-        root.setStyle("-fx-background-color: #FAEBD7;");
-
-        shopScene = new Scene(root, 900, 500);
-    }
-
-    // ================= LOGIN LOGIC =================
-    private void handleLogin(String u, String p) {
-
-        if (userRegistry.containsKey(u)
-                && userRegistry.get(u).getPassword().equals(p)) {
-
-            currentUser = userRegistry.get(u);
-
-            welcomeLabel.setText("Welcome " + currentUser.getUsername());
-
-            primaryStage.setScene(homeScene);
-
-        } else {
-            alert("Login Failed", "Wrong username/password");
-        }
-    }
-
-    // ================= REGISTER LOGIC =================
-    private void handleRegister(String u, String p, String cp, String role) {
-
-        if (u.isEmpty() || p.isEmpty() || cp.isEmpty()) {
-            alert("Error", "Fill all fields");
-            return;
-        }
-
-        if (!p.equals(cp)) {
-            alert("Error", "Password not match");
-            return;
-        }
-
-        if (userRegistry.containsKey(u)) {
-            alert("Error", "User exists");
-            return;
-        }
-
-        if (role.equals("Admin")) {
-            userRegistry.put(u, new Admin(u, p));
-        } else {
-            userRegistry.put(u, new Customer(u, p));
-        }
-
-        alert("Success", "Account created");
-        primaryStage.setScene(loginScene);
-    }
-
-    // ================= PRODUCTS (15 ITEMS) =================
-    private void setupProducts() {
-
-        products.addAll(
-                new Product("Abaya Black", "Abaya", 120),
-                new Product("Abaya White", "Abaya", 130),
-                new Product("Hijab Silk", "Hijab", 45),
-                new Product("Hijab Cotton", "Hijab", 25),
-                new Product("Hijab Premium", "Hijab", 60),
-                new Product("Jubah Modern", "Jubah", 150),
-                new Product("Jubah Classic", "Jubah", 90),
-                new Product("Jubah Premium", "Jubah", 180),
-                new Product("Telekung Cotton", "Telekung", 80),
-                new Product("Telekung Travel", "Telekung", 70),
-                new Product("Telekung Premium", "Telekung", 110),
-                new Product("Prayer Set", "Set", 140),
-                new Product("Gift Box Hijrah", "Gift", 200),
-                new Product("Fashion Bag", "Accessory", 60),
-                new Product("Scarf Pin", "Accessory", 15)
-        );
-    }
-
-    // ================= TABLE =================
-    private void setupTables() {
-
-        TableColumn<Product, String> nameCol = new TableColumn<>("Name");
-        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-
-        TableColumn<Product, Double> priceCol = new TableColumn<>("Price");
-        priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
-
-        productTable.setItems(products);
-        productTable.getColumns().setAll(nameCol, priceCol);
-
-        cartTable.setItems(cart);
-        cartTable.getColumns().setAll(nameCol, priceCol);
-    }
-
-    // ================= CART =================
-    private void addToCart() {
-        Product p = productTable.getSelectionModel().getSelectedItem();
-        if (p != null) {
-            cart.add(p);
-            updateTotal();
-        }
-    }
-
-    private void removeFromCart() {
-        Product p = cartTable.getSelectionModel().getSelectedItem();
-        if (p != null) {
-            cart.remove(p);
-            updateTotal();
-        }
-    }
-
-    private void updateTotal() {
-        double total = cart.stream().mapToDouble(Product::getPrice).sum();
-        totalLabel.setText("Total: RM " + total);
-    }
-
-    // ================= RECEIPT =================
-    private void showReceipt() {
-
-        double total = cart.stream().mapToDouble(Product::getPrice).sum();
-
-        Label receipt = new Label("🧾 RECEIPT");
-        Label totalText = new Label("Total: RM " + total);
-        Label thanks = new Label("THANK YOU FOR PURCHASING ✨");
-
-        Button back = new Button("Back Home");
-        back.setOnAction(e -> {
-            cart.clear();
-            updateTotal();
-            primaryStage.setScene(homeScene);
-        });
-
-        VBox root = new VBox(15, receipt, totalText, thanks, back);
-        root.setAlignment(Pos.CENTER);
-
-        receiptScene = new Scene(root, 400, 300);
-        primaryStage.setScene(receiptScene);
-    }
-
-    // ================= ALERT =================
-    private void alert(String t, String m) {
-        Alert a = new Alert(Alert.AlertType.INFORMATION);
-        a.setTitle(t);
-        a.setContentText(m);
-        a.show();
-    }
-
-    public static void main(String[] args) {
-        launch(args);
-    }
-}        window.setScene(loadingScene());
-        window.show();
-    }
-
-    // ================= LOADING SCREEN (BONUS) =================
-    private Scene loadingScene() {
-
-        Label loading = new Label("Loading Hijrah Fashion Hub...");
-        loading.setStyle("-fx-font-size: 20px; -fx-text-fill: #5C4033;");
-
-        ProgressBar bar = new ProgressBar();
-        bar.setPrefWidth(200);
-
-        VBox root = new VBox(20, loading, bar);
-        root.setAlignment(Pos.CENTER);
-        root.setStyle("-fx-background-color: #F5E6D3;");
-
-        Timeline t = new Timeline(
-                new KeyFrame(Duration.seconds(2), e -> window.setScene(loginScene()))
-        );
-        t.play();
-
-        applyFade(root);
-
-        return new Scene(root, 900, 500);
-    }
-
-    // ================= LOGIN =================
-    private Scene loginScene() {
-
-        TextField user = new TextField();
-        PasswordField pass = new PasswordField();
-
-        user.setPromptText("Username");
-        pass.setPromptText("Password");
-
-        Button login = new Button("LOGIN");
-        animateButton(login);
-
-        login.setOnAction(e -> {
-
-            if (user.getText().equals("nana") && pass.getText().equals("1234")) {
-                window.setScene(customerScene());
-            }
-
-            else if (user.getText().equals("Ika") && pass.getText().equals("123")) {
-                window.setScene(adminScene());
-            }
-
-            else {
-                alert("Login Failed", "Wrong credentials");
-            }
-        });
-
-        VBox root = new VBox(7, new Label("HIJRAH LOGIN"), user, pass, login);
-        root.setAlignment(Pos.CENTER);
-
-        applyFade(root);
-
-        return new Scene(root, 900, 500);
-    }
-
-    // ================= CUSTOMER =================
-    private Scene customerScene() {
-
-        setupTables();
-
-        TextField search = new TextField();
-        search.setPromptText("Search product...");
-
-        search.textProperty().addListener((a, b, c) -> filter(c));
-
-        Button add = new Button("Add To Cart");
-        Button remove = new Button("Remove");
-        Button checkout = new Button("Checkout");
-
-        animateButton(add);
-        animateButton(remove);
-        animateButton(checkout);
-
-        add.setOnAction(e -> addToCart());
-        remove.setOnAction(e -> removeFromCart());
-
-        checkout.setOnAction(e -> {
-
-            if (cart.isEmpty()) {
-                alert("Empty Cart", "Add items first");
-                return;
-            }
-
-            window.setScene(receiptScene());
-        });
-
-        VBox left = new VBox(10, search, productTable, add);
-        VBox right = new VBox(10, cartTable, remove, totalLabel, checkout);
-
-        HBox root = new HBox(30, left, right);
-        root.setAlignment(Pos.CENTER);
-        root.setStyle("-fx-background-color: linear-gradient(to right, #FFF8F0, #D2B48C);");
-
-        applyFade(root);
-
-        return new Scene(root, 900, 500);
-    }
-
-    // ================= ADMIN =================
-    private Scene adminScene() {
+        table.getColumns().setAll(n, c, p);
 
         TextField name = new TextField();
         TextField cat = new TextField();
         TextField price = new TextField();
 
-        name.setPromptText("Name");
-        cat.setPromptText("Category");
-        price.setPromptText("Price");
-
         Button add = new Button("Add");
         Button delete = new Button("Delete");
-
-        animateButton(add);
-        animateButton(delete);
+        Button back = new Button("Back");
 
         add.setOnAction(e -> {
-            products.add(new Product(name.getText(), cat.getText(), Double.parseDouble(price.getText())));
+            products.add(new Product(name.getText(), cat.getText(),
+                    Double.parseDouble(price.getText())));
+            refreshTable();
         });
 
         delete.setOnAction(e -> {
-            Product p = productTable.getSelectionModel().getSelectedItem();
-            if (p != null) products.remove(p);
+            Product selected = table.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                products.remove(selected);
+                refreshTable();
+            }
         });
 
-        setupTables();
+        back.setOnAction(e -> primaryStage.setScene(homeScene));
 
-        VBox root = new VBox(10, new Label("ADMIN PANEL"), name, cat, price, add, delete, productTable);
-        root.setAlignment(Pos.CENTER);
+        VBox form = new VBox(10, name, cat, price, add, delete, back);
+        HBox root = new HBox(20, table, form);
 
-        applyFade(root);
-
-        return new Scene(root, 900, 500);
+        adminScene = new Scene(root, 800, 500);
     }
 
-    // ================= RECEIPT =================
-    private Scene receiptScene() {
-
-        double total = cart.stream().mapToDouble(Product::getPrice).sum();
-
-        Label title = new Label("🧾 RECEIPT");
-        Label items = new Label("Items: " + cart.size());
-        Label totalText = new Label("Total: RM " + total);
-        Label thanks = new Label("THANK YOU FOR PURCHASING ✨");
-
-        Button home = new Button("Back Home");
-        animateButton(home);
-
-        home.setOnAction(e -> {
-            cart.clear();
-            updateTotal();
-            window.setScene(loginScene());
-        });
-
-        saveReceipt(total);
-
-        VBox root = new VBox(15, title, items, totalText, thanks, home);
-        root.setAlignment(Pos.CENTER);
-        root.setStyle("-fx-background-color: #F5E6D3;");
-
-        applyFade(root);
-
-        return new Scene(root, 900, 500);
-    }
-
-    // ================= FILE SAVE =================
-    private void saveReceipt(double total) {
-        try {
-            FileWriter w = new FileWriter("receipt.txt");
-            w.write("HIJRAH FASHION HUB\n");
-            w.write("TOTAL: RM " + total + "\n");
-            w.close();
-        } catch (Exception e) {
-            System.out.println("File error");
-        }
-    }
-
+     
     // ================= FILTER =================
-    private void filter(String keyword) {
+    private void filter(String keyword, String category) {
 
-        ObservableList<Product> filtered = FXCollections.observableArrayList();
+        ObservableList<Product> temp = FXCollections.observableArrayList();
 
         for (Product p : products) {
-            if (p.getName().toLowerCase().contains(keyword.toLowerCase())) {
-                filtered.add(p);
-            }
+
+            boolean matchName = p.getName().toLowerCase()
+                    .contains(keyword.toLowerCase());
+
+            boolean matchCat = category.equals("All")
+                    || p.getCategory().equals(category);
+
+            if (matchName && matchCat) temp.add(p);
         }
 
-        productTable.setItems(filtered);
+        productTable.setItems(temp);
+    }
+
+    // ⭐ FIX CUSTOMER EMPTY PRODUCT BUG
+    private void refreshTable() {
+        productTable.setItems(products);
     }
 
     // ================= TABLE =================
-    private void setupTables() {
+    // ================= TABLE =================
+private void setupTables() {
 
-        TableColumn<Product, String> n = new TableColumn<>("Name");
-        n.setCellValueFactory(new PropertyValueFactory<>("name"));
+    // Clear old columns
+    productTable.getColumns().clear();
+    cartTable.getColumns().clear();
 
-        TableColumn<Product, Double> p = new TableColumn<>("Price");
-        p.setCellValueFactory(new PropertyValueFactory<>("price"));
+    // ---------- PRODUCT TABLE ----------
 
-        productTable.getColumns().setAll(n, p);
-        productTable.setItems(products);
+    TableColumn<Product, String> productName =
+            new TableColumn<>("Name");
+    productName.setCellValueFactory(
+            new PropertyValueFactory<>("name"));
 
-        TableColumn<Product, String> cn = new TableColumn<>("Name");
-        cn.setCellValueFactory(new PropertyValueFactory<>("name"));
+    TableColumn<Product, String> productCategory =
+            new TableColumn<>("Category");
+    productCategory.setCellValueFactory(
+            new PropertyValueFactory<>("category"));
 
-        TableColumn<Product, Double> cp = new TableColumn<>("Price");
-        cp.setCellValueFactory(new PropertyValueFactory<>("price"));
+    TableColumn<Product, Double> productPrice =
+            new TableColumn<>("Price");
+    productPrice.setCellValueFactory(
+            new PropertyValueFactory<>("price"));
 
-        cartTable.getColumns().setAll(cn, cp);
-        cartTable.setItems(cart);
-    }
+    productTable.getColumns().addAll(
+            productName,
+            productCategory,
+            productPrice
+    );
 
-    // ================= CART =================
-    private void addToCart() {
-        Product p = productTable.getSelectionModel().getSelectedItem();
-        if (p != null) {
-            cart.add(p);
-            bounce(cartTable);
-            updateTotal();
-        }
-    }
+    productTable.setItems(products);
 
-    private void removeFromCart() {
-        Product p = cartTable.getSelectionModel().getSelectedItem();
-        if (p != null) {
-            cart.remove(p);
-            updateTotal();
-        }
-    }
+    // ---------- CART TABLE ----------
 
-    private void updateTotal() {
-        double total = cart.stream().mapToDouble(Product::getPrice).sum();
-        totalLabel.setText("Total: RM " + total);
-    }
+    TableColumn<Product, String> cartName =
+            new TableColumn<>("Name");
+    cartName.setCellValueFactory(
+            new PropertyValueFactory<>("name"));
 
-    // ================= ANIMATIONS =================
-    private void applyFade(Node node) {
-        FadeTransition f = new FadeTransition(Duration.millis(600), node);
-        f.setFromValue(0);
-        f.setToValue(1);
-        f.play();
-    }
+    TableColumn<Product, Double> cartPrice =
+            new TableColumn<>("Price");
+    cartPrice.setCellValueFactory(
+            new PropertyValueFactory<>("price"));
 
-    private void animateButton(Button b) {
-        b.setOnMouseEntered(e -> {
-            ScaleTransition s = new ScaleTransition(Duration.millis(150), b);
-            s.setToX(1.1);
-            s.setToY(1.1);
-            s.play();
-        });
+    cartTable.getColumns().addAll(
+            cartName,
+            cartPrice
+    );
 
-        b.setOnMouseExited(e -> {
-            ScaleTransition s = new ScaleTransition(Duration.millis(150), b);
-            s.setToX(1);
-            s.setToY(1);
-            s.play();
-        });
-    }
+    cartTable.setItems(cart);
+}
 
-    private void bounce(Node n) {
-        ScaleTransition s = new ScaleTransition(Duration.millis(120), n);
-        s.setFromX(1);
-        s.setFromY(1);
-        s.setToX(1.05);
-        s.setToY(1.05);
-        s.setAutoReverse(true);
-        s.setCycleCount(2);
-        s.play();
-    }
-
-    // ================= PRODUCTS (15 ITEMS) =================
+    // ================= PRODUCTS =================
     private void setupProducts() {
 
         products.addAll(
-                new Product("Abaya Black", "Abaya", 120),
-                new Product("Abaya White", "Abaya", 130),
-                new Product("Hijab Silk", "Hijab", 45),
-                new Product("Hijab Cotton", "Hijab", 25),
-                new Product("Hijab Premium", "Hijab", 60),
-                new Product("Jubah Modern", "Jubah", 150),
-                new Product("Jubah Classic", "Jubah", 90),
-                new Product("Jubah Premium", "Jubah", 180),
-                new Product("Telekung Cotton", "Telekung", 80),
-                new Product("Telekung Travel", "Telekung", 70),
-                new Product("Telekung Premium", "Telekung", 110),
-                new Product("Prayer Set", "Set", 140),
-                new Product("Gift Box Hijrah", "Gift", 200),
-                new Product("Fashion Bag", "Accessory", 60),
-                new Product("Scarf Pin", "Accessory", 15)
+                new Product("Abaya", "Abaya", 120),
+                new Product("Hijab", "Hijab", 45),
+                new Product("Jubah", "Jubah", 150),
+                new Product("Scarf", "Accessory", 25),
+                new Product("Bag", "Accessory", 60),
+                new Product("Shoes", "Accessory", 90),
+                new Product("Gift Box", "Set", 200)
         );
+    }
+
+    // ================= TOTAL =================
+    private void updateTotal() {
+        totalLabel.setText("Total: RM " +
+                cart.stream().mapToDouble(Product::getPrice).sum());
     }
 
     // ================= ALERT =================
     private void alert(String t, String m) {
-        Alert a = new Alert(Alert.AlertType.ERROR);
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
         a.setTitle(t);
         a.setContentText(m);
         a.show();
-    }
-
-    public static void main(String[] args) {
-        launch(args);
-    }
-}        password.setPromptText("Password");
-
-        Button loginBtn = new Button("Login");
-
-        loginBtn.setOnAction(e -> {
-            String user = username.getText();
-            String pass = password.getText();
-
-            if (users.containsKey(user) && users.get(user).equals(pass)) {
-
-                if (user.equals("admin")) {
-                    new AdminController().start(stage);
-                } else {
-                    new CustomerController().start(stage);
-                }
-
-            } else {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid Login");
-                alert.show();
-            }
-        });
-
-        VBox root = new VBox(10, title, username, password, loginBtn);
-        root.setAlignment(Pos.CENTER);
-
-        stage.setScene(new Scene(root, 300, 200));
-        stage.setTitle("Hijrah Fashion Hub");
-        stage.show();
-    }
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }
