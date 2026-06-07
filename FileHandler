@@ -1,4 +1,149 @@
-loadProducts()
-saveProducts()
-loadOrders()
-saveOrders()
+package javafxhijrahfashionhub;
+
+import java.io.*;
+import java.util.*;
+import javafx.collections.ObservableList;
+
+public class FileHandler {
+
+    private static final String USER_FILE = "users.txt";
+    private static final String PRODUCT_FILE = "products.txt";
+    private static final String ORDER_FILE = "orders.txt";
+
+    // ================= USERS =================
+
+    public static void saveUsers(Map<String, User> users) {
+
+        try (PrintWriter pw = new PrintWriter(new FileWriter(USER_FILE))) {
+
+            for (User u : users.values()) {
+
+                String role = (u instanceof Admin)
+                        ? "Admin"
+                        : "Customer";
+
+                pw.println(
+                        u.getUsername() + "," +
+                        u.getPassword() + "," +
+                        role
+                );
+            }
+
+        } catch (IOException e) {
+            System.out.println("User save error");
+        }
+    }
+
+    public static void loadUsers(Map<String, User> users) {
+
+        File f = new File(USER_FILE);
+
+        if (!f.exists()) return;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(f))) {
+
+            String line;
+
+            while ((line = br.readLine()) != null) {
+
+                String[] data = line.split(",");
+
+                if (data.length == 3) {
+
+                    if (data[2].equals("Admin")) {
+
+                        users.put(
+                                data[0],
+                                new Admin(data[0], data[1])
+                        );
+
+                    } else {
+
+                        users.put(
+                                data[0],
+                                new Customer(data[0], data[1])
+                        );
+                    }
+                }
+            }
+
+        } catch (IOException e) {
+            System.out.println("User load error");
+        }
+    }
+
+    // ================= PRODUCTS =================
+
+    public static void saveProducts(
+            ObservableList<Product> products) {
+
+        try (PrintWriter pw =
+                     new PrintWriter(
+                             new FileWriter(PRODUCT_FILE))) {
+
+            for (Product p : products) {
+
+                pw.println(
+                        p.getName() + "," +
+                        p.getCategory() + "," +
+                        p.getPrice()
+                );
+            }
+
+        } catch (IOException e) {
+            System.out.println("Product save error");
+        }
+    }
+
+    public static void loadProducts(
+            ObservableList<Product> products) {
+
+        File f = new File(PRODUCT_FILE);
+
+        if (!f.exists()) return;
+
+        try (BufferedReader br =
+                     new BufferedReader(
+                             new FileReader(f))) {
+
+            String line;
+
+            while ((line = br.readLine()) != null) {
+
+                String[] data = line.split(",");
+
+                products.add(
+                        new Product(
+                                data[0],
+                                data[1],
+                                Double.parseDouble(data[2])
+                        )
+                );
+            }
+
+        } catch (IOException e) {
+            System.out.println("Product load error");
+        }
+    }
+
+    // ================= ORDERS =================
+
+    public static void saveOrder(Order order) {
+
+        try (PrintWriter pw =
+                     new PrintWriter(
+                             new FileWriter(
+                                     ORDER_FILE,
+                                     true))) {
+
+            pw.println(
+                    order.getCustomer() +
+                            "," +
+                            order.getTotal()
+            );
+
+        } catch (IOException e) {
+            System.out.println("Order save error");
+        }
+    }
+}
