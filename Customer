@@ -1,17 +1,13 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package javafxhijrahfashionhub;
 
-class Customer extends User {
+public class Customer extends User {
 
-    public Customer(String name, String email, String password) {
-        super(name, email, password);
+    public Customer(String u, String p) {
+        super(u, p);
     }
 
     @Override
-    public void showDashboard() {
-        System.out.println("Welcome Customer: " + getName());
+    public String roleInfo() {
+        return "CUSTOMER";
     }
 }
