@@ -1,13 +1,13 @@
 package javafxhijrahfashionhub;
 
-class Admin extends User {
+public class Admin extends User {
 
-    public Admin(String name, String email, String password) {
-        super(name, email, password);
+    public Admin(String u, String p) {
+        super(u, p);
     }
 
     @Override
-    public void showDashboard() {
-        System.out.println("Admin Panel Access Granted");
+    public String roleInfo() {
+        return "ADMIN";
     }
 }
