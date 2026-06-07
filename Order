@@ -1,10 +1,28 @@
-orderId
-Customer customer
-List<CartItem> items
-totalPrice
-date
+package javafxhijrahfashionhub;
 
-Functions:
+import java.util.List;
 
-generateInvoice()
-calculateTotal()
+public class Order {
+
+    private String customer;
+    private List<Product> items;
+    private double total;
+
+    public Order(String customer, List<Product> items, double total) {
+        this.customer = customer;
+        this.items = items;
+        this.total = total;
+    }
+
+    public String getCustomer() {
+        return customer;
+    }
+
+    public List<Product> getItems() {
+        return items;
+    }
+
+    public double getTotal() {
+        return total;
+    }
+}
