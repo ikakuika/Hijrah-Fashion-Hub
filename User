@@ -1,21 +1,22 @@
-
 package javafxhijrahfashionhub;
 
+public abstract class User {
 
-abstract class User {
-    private String name;
-    private String email;
+    private String username;
     private String password;
 
-    public User(String name, String email, String password) {
-        this.name = name;
-        this.email = email;
+    public User(String username, String password) {
+        this.username = username;
         this.password = password;
     }
 
-    public String getName() {
-        return name;
+    public String getUsername() {
+        return username;
     }
 
-    public abstract void showDashboard();
+    public String getPassword() {
+        return password;
+    }
+
+    public abstract String roleInfo();
 }
