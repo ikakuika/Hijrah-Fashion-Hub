@@ -1,23 +1,132 @@
-package com.mycompany.hijrahfashionhub;
+package javafxhijrahfashionhub;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 public class AdminController {
 
+    // PRODUCT STORAGE
+    private final ObservableList<Product> products = FXCollections.observableArrayList();
+
+    private TableView<Product> table = new TableView<>();
+
     public void start(Stage stage) {
 
+        // ================= INPUT FIELDS =================
+        TextField nameField = new TextField();
+        nameField.setPromptText("Product Name");
+
+        TextField categoryField = new TextField();
+        categoryField.setPromptText("Category");
+
+        TextField priceField = new TextField();
+        priceField.setPromptText("Price");
+
+        // ================= BUTTONS =================
         Button addProduct = new Button("Add Product");
         Button editProduct = new Button("Edit Product");
-        Button viewOrders = new Button("View Orders");
+        Button deleteProduct = new Button("Delete Product");
 
-        VBox root = new VBox(10, addProduct, editProduct, viewOrders);
+        // ================= TABLE =================
+        setupTable();
+
+        // ================= ADD PRODUCT =================
+        addProduct.setOnAction(e -> {
+
+            try {
+                String name = nameField.getText();
+                String category = categoryField.getText();
+                double price = Double.parseDouble(priceField.getText());
+
+                if (name.isEmpty() || category.isEmpty()) {
+                    showAlert("Error", "Please fill all fields");
+                    return;
+                }
+
+                products.add(new Product(name, category, price));
+
+                nameField.clear();
+                categoryField.clear();
+                priceField.clear();
+
+            } catch (NumberFormatException ex) {
+                showAlert("Error", "Price must be a number");
+            }
+        });
+
+        // ================= DELETE PRODUCT =================
+        deleteProduct.setOnAction(e -> {
+            Product selected = table.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                products.remove(selected);
+            }
+        });
+
+        // ================= EDIT PRODUCT =================
+        editProduct.setOnAction(e -> {
+
+            Product selected = table.getSelectionModel().getSelectedItem();
+
+            if (selected != null) {
+                selected.setName(nameField.getText());
+                selected.setCategory(categoryField.getText());
+                selected.setPrice(Double.parseDouble(priceField.getText()));
+
+                table.refresh();
+            }
+        });
+
+        // ================= LAYOUT =================
+        VBox form = new VBox(10,
+                new Label("ADD / EDIT PRODUCT"),
+                nameField,
+                categoryField,
+                priceField,
+                addProduct,
+                editProduct,
+                deleteProduct
+        );
+
+        VBox tableBox = new VBox(10, new Label("PRODUCT LIST"), table);
+
+        HBox root = new HBox(20, form, tableBox);
+        root.setPadding(new Insets(10));
         root.setAlignment(Pos.CENTER);
 
-        stage.setScene(new Scene(root, 300, 200));
-        stage.setTitle("Admin Dashboard");
+        Scene scene = new Scene(root, 700, 400);
+        stage.setScene(scene);
+        stage.setTitle("Admin Dashboard - Hijrah Fashion Hub");
+        stage.show();
+    }
+
+    // ================= TABLE SETUP =================
+    private void setupTable() {
+
+        TableColumn<Product, String> nameCol = new TableColumn<>("Name");
+        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        TableColumn<Product, String> catCol = new TableColumn<>("Category");
+        catCol.setCellValueFactory(new PropertyValueFactory<>("category"));
+
+        TableColumn<Product, Double> priceCol = new TableColumn<>("Price");
+        priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
+
+        table.getColumns().addAll(nameCol, catCol, priceCol);
+        table.setItems(products);
+    }
+
+    // ================= ALERT =================
+    private void showAlert(String title, String msg) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setContentText(msg);
+        alert.show();
     }
 }
