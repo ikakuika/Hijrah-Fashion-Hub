@@ -1,5 +1,5 @@
-package javafxhijrahfashionhub;
 
+package javafxhijrahfashionhub;
 
 class OutOfStockException extends Exception {
     public OutOfStockException(String message) {
