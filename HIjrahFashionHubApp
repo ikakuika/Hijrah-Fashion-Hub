@@ -263,96 +263,136 @@ public class HijrahFashionHubApp extends Application {
 
     // ================= SHOP =================
    
+       // ================= SHOP =================
         private void createShopScene() {
-          productTable = new TableView<>();
-          cartTable = new TableView<>();
-          
-          TableColumn<Product, String> productNameCol = new TableColumn<>("Name");
-          productNameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-          TableColumn<Product, String> productCategoryCol =new TableColumn<>("Category");
-          productCategoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
-          TableColumn<Product, Double> productPriceCol = new TableColumn<>("Price");
-          productPriceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
-          productTable.getColumns().addAll( productNameCol,productCategoryCol,productPriceCol
-          );
-          productTable.setItems(filteredProducts);
-          // ================= CART TABLE =================
-          
-          TableColumn<Product, String> cartNameCol =new TableColumn<>("Name");
-          cartNameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-          TableColumn<Product, String> cartCategoryCol =new TableColumn<>("Category");
-          cartCategoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
-          TableColumn<Product, Double> cartPriceCol =new TableColumn<>("Price");
-          cartPriceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
-          cartTable.getColumns().addAll(cartNameCol, cartCategoryCol,cartPriceCol);
-          cartTable.setItems(cart);
-          
-          // ================= SEARCH =================
-          TextField search = new TextField();
-          search.setPromptText("Search product");
-          
-          
-          // ================= CATEGORY =================
-          ComboBox<String> category = new ComboBox<>();
-          category.getItems().addAll(
-                  "All",
-                  "Abaya",
-                  "Hijab",
-                  "Jubah",
-                  "Accessory",
-                  "Set"
-          );
-          category.setValue("All");
-          search.textProperty().addListener((a, b, c) ->
-                  filter(c, category.getValue()));
-          category.setOnAction(e ->
-                  filter(search.getText(), category.getValue()));
-          
-          
-          // ================= BUTTONS =================
-          Button add = new Button("Add");
-          Button remove = new Button("Remove");
-          Button order = new Button("Place Order");
-          Button history = new Button("History");
-          Button back = new Button("Back");
-          add.setOnAction(e -> {
-              Product p = productTable.getSelectionModel().getSelectedItem();
-              if (p != null) {
-                  cart.add(p);
-                  updateTotal();
-              }
-          });
-          remove.setOnAction(e -> {
-              Product p = cartTable.getSelectionModel().getSelectedItem();
-              if (p != null) {
-                  cart.remove(p);
-                  updateTotal();
-              }
-          });
-          order.setOnAction(e -> placeOrder());
-          history.setOnAction(e -> viewOrderHistory());
-          back.setOnAction(e -> primaryStage.setScene(homeScene));
-          // ================= LAYOUT =================
-          productTable.setPrefWidth(450);
-          cartTable.setPrefWidth(350);
-          VBox left = new VBox(10,
-                  search,
-                  category,
-                  productTable,
-                  add
-          );
-          VBox right = new VBox(10,
-                  cartTable,
-                  remove,
-                  totalLabel,
-                  order,
-                  history,
-                  back
-          );
-          HBox root = new HBox(20, left, right);
-          root.setPadding(new Insets(10));
-          shopScene = new Scene(root, 900, 500);
-      }
+
+            productTable = new TableView<>();
+            cartTable = new TableView<>();
+
+            // ================= PRODUCT TABLE =================
+            TableColumn<Product, String> productNameCol = new TableColumn<>("Name");
+            productNameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+            TableColumn<Product, String> productCategoryCol = new TableColumn<>("Category");
+            productCategoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
+
+            TableColumn<Product, Double> productPriceCol = new TableColumn<>("Price");
+            productPriceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
+
+            productTable.getColumns().addAll(productNameCol, productCategoryCol, productPriceCol);
+            productTable.setItems(filteredProducts);
+
+            // ================= CART TABLE =================
+            TableColumn<Product, String> cartNameCol = new TableColumn<>("Name");
+            cartNameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+            TableColumn<Product, String> cartCategoryCol = new TableColumn<>("Category");
+            cartCategoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
+
+            TableColumn<Product, Double> cartPriceCol = new TableColumn<>("Price");
+            cartPriceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
+
+            cartTable.getColumns().addAll(cartNameCol, cartCategoryCol, cartPriceCol);
+            cartTable.setItems(cart);
+
+            // ================= SEARCH & CATEGORY =================
+            TextField search = new TextField();
+            search.setPromptText("Search product");
+
+            ComboBox<String> category = new ComboBox<>();
+            category.getItems().addAll("All", "Abaya", "Hijab", "Jubah", "Accessory", "Set");
+            category.setValue("All");
+
+            search.textProperty().addListener((a, b, c) -> filter(c, category.getValue()));
+            category.setOnAction(e -> filter(search.getText(), category.getValue()));
+
+            // ================= BUTTONS =================
+            Button add     = new Button("Add to Cart");
+            Button remove  = new Button("Remove");
+            Button order   = new Button("Place Order");
+            Button invoice = new Button("View Invoice");   
+            Button history = new Button("History");
+            Button back    = new Button("Back");
+
+            // Style the total label
+            totalLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+
+            add.setOnAction(e -> {
+                Product p = productTable.getSelectionModel().getSelectedItem();
+                if (p != null) {
+                    cart.add(p);
+                    updateTotal();
+                }
+            });
+
+            remove.setOnAction(e -> {
+                Product p = cartTable.getSelectionModel().getSelectedItem();
+                if (p != null) {
+                    cart.remove(p);
+                    updateTotal();
+                }
+            });
+
+            order.setOnAction(e -> placeOrder());
+
+           
+            invoice.setOnAction(e -> {
+                if (!cart.isEmpty()) {
+                    double total = cart.stream().mapToDouble(Product::getPrice).sum();
+                    Order preview = new Order(currentUser.getUsername(), new ArrayList<>(cart), total);
+                    showInvoicePopup(preview);
+                } else if (!orders.isEmpty()) {
+                    // Show the last order placed by this user
+                    Order lastOrder = null;
+                    for (Order o : orders) {
+                        if (o.getCustomer().equals(currentUser.getUsername())) {
+                            lastOrder = o;
+                        }
+                    }
+                    if (lastOrder != null) {
+                        showInvoicePopup(lastOrder);
+                    } else {
+                        alert("No Invoice", "No orders found for your account.");
+                    }
+                } else {
+                    alert("Empty", "Your cart is empty and you have no past orders.");
+                }
+            });
+
+            history.setOnAction(e -> viewOrderHistory());
+            back.setOnAction(e -> primaryStage.setScene(homeScene));
+
+            // ================= LAYOUT =================
+            productTable.setPrefWidth(450);
+            cartTable.setPrefWidth(350);
+
+            VBox left = new VBox(10,
+                    new Label(" Products"),
+                    search,
+                    category,
+                    productTable,
+                    add
+            );
+
+           
+            HBox totalRow = new HBox(15, totalLabel, invoice);
+            totalRow.setAlignment(Pos.CENTER_LEFT);
+
+            VBox right = new VBox(10,
+                    new Label(" Your Cart"),
+                    cartTable,
+                    remove,
+                    totalRow,       // total + invoice button side by side
+                    order,
+                    history,
+                    back
+            );
+
+            HBox root = new HBox(20, left, right);
+            root.setPadding(new Insets(10));
+
+            shopScene = new Scene(root, 900, 500);
+        }
           // ================= ADMIN =================
           private void createAdminScene() {
               TableView<Product> table = new TableView<>();
@@ -387,9 +427,9 @@ public class HijrahFashionHubApp extends Application {
                   total
           );
           orders.add(order);
-        
+          // save file invoice (optional still keep)
           saveInvoice(order);
-          
+         
           showInvoicePopup(order);
           cart.clear();
           updateTotal();
