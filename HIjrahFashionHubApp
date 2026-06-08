@@ -1,3 +1,17 @@
+
+
+/*
+========================================================
+ PROJECT: Hijrah Fashion Hub (JavaFX)
+ GROUP MEMBERS:
+
+ 1. SITI NUR YASIRAH BINTI MD FUZI - 2416652
+ 2. SITI ZULAIKA BINTI JAUFARI - 2423064
+ 3. SYAZANA IFFA ATHIRA BINTI SAHILAN - 2513176
+ 4. LAILA NAZ BINTI AZHAR - 2514660
+
+========================================================
+*/
 package javafxhijrahfashionhub;
 
 import javafx.application.Application;
