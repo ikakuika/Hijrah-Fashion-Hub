@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.*;
 
 
+
 // User: SITI ZULAIKA BINTI JAUFARI - - Main JavaFX application handling UI navigation, cart system and order processing
 public class HijrahFashionHubApp extends Application {
 
