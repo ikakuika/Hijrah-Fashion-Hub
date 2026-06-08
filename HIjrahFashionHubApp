@@ -262,59 +262,37 @@ public class HijrahFashionHubApp extends Application {
     }
 
     // ================= SHOP =================
-      
-      private void createShopScene() {
-
+   
+        private void createShopScene() {
           productTable = new TableView<>();
           cartTable = new TableView<>();
-
           
-          TableColumn<Product, String> productNameCol =
-                  new TableColumn<>("Name");
+          TableColumn<Product, String> productNameCol = new TableColumn<>("Name");
           productNameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-
-          TableColumn<Product, String> productCategoryCol =
-                  new TableColumn<>("Category");
+          TableColumn<Product, String> productCategoryCol =new TableColumn<>("Category");
           productCategoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
-
-          TableColumn<Product, Double> productPriceCol =
-                  new TableColumn<>("Price");
+          TableColumn<Product, Double> productPriceCol = new TableColumn<>("Price");
           productPriceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
-
-          productTable.getColumns().addAll(
-                  productNameCol,
-                  productCategoryCol,
-                  productPriceCol
+          productTable.getColumns().addAll( productNameCol,productCategoryCol,productPriceCol
           );
-
           productTable.setItems(filteredProducts);
-
-   
-          TableColumn<Product, String> cartNameCol =
-                  new TableColumn<>("Name");
+          // ================= CART TABLE =================
+          
+          TableColumn<Product, String> cartNameCol =new TableColumn<>("Name");
           cartNameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-
-          TableColumn<Product, String> cartCategoryCol =
-                  new TableColumn<>("Category");
+          TableColumn<Product, String> cartCategoryCol =new TableColumn<>("Category");
           cartCategoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
-
-          TableColumn<Product, Double> cartPriceCol =
-                  new TableColumn<>("Price");
+          TableColumn<Product, Double> cartPriceCol =new TableColumn<>("Price");
           cartPriceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
-
-          cartTable.getColumns().addAll(
-                  cartNameCol,
-                  cartCategoryCol,
-                  cartPriceCol
-          );
-
+          cartTable.getColumns().addAll(cartNameCol, cartCategoryCol,cartPriceCol);
           cartTable.setItems(cart);
-
-        
+          
+          // ================= SEARCH =================
           TextField search = new TextField();
-          search.setPromptText("Search product...");
-
-       
+          search.setPromptText("Search product");
+          
+          
+          // ================= CATEGORY =================
           ComboBox<String> category = new ComboBox<>();
           category.getItems().addAll(
                   "All",
@@ -325,21 +303,18 @@ public class HijrahFashionHubApp extends Application {
                   "Set"
           );
           category.setValue("All");
-
-          
-          search.textProperty().addListener((obs, oldVal, newVal) ->
-                  filter(newVal, category.getValue())
-          );
-
+          search.textProperty().addListener((a, b, c) ->
+                  filter(c, category.getValue()));
           category.setOnAction(e ->
-                  filter(search.getText(), category.getValue())
-          );
-
+                  filter(search.getText(), category.getValue()));
           
+          
+          // ================= BUTTONS =================
           Button add = new Button("Add");
           Button remove = new Button("Remove");
+          Button order = new Button("Place Order");
+          Button history = new Button("History");
           Button back = new Button("Back");
-
           add.setOnAction(e -> {
               Product p = productTable.getSelectionModel().getSelectedItem();
               if (p != null) {
@@ -347,7 +322,6 @@ public class HijrahFashionHubApp extends Application {
                   updateTotal();
               }
           });
-
           remove.setOnAction(e -> {
               Product p = cartTable.getSelectionModel().getSelectedItem();
               if (p != null) {
@@ -355,142 +329,177 @@ public class HijrahFashionHubApp extends Application {
                   updateTotal();
               }
           });
-
+          order.setOnAction(e -> placeOrder());
+          history.setOnAction(e -> viewOrderHistory());
           back.setOnAction(e -> primaryStage.setScene(homeScene));
-
-        
+          // ================= LAYOUT =================
+          productTable.setPrefWidth(450);
+          cartTable.setPrefWidth(350);
           VBox left = new VBox(10,
                   search,
                   category,
                   productTable,
                   add
           );
-
           VBox right = new VBox(10,
                   cartTable,
                   remove,
                   totalLabel,
+                  order,
+                  history,
                   back
           );
-
           HBox root = new HBox(20, left, right);
           root.setPadding(new Insets(10));
-
-
-          root.setStyle("-fx-background-color: #FFD1DC;");
-
           shopScene = new Scene(root, 900, 500);
       }
-
-    // ================= ADMIN =================
-    private void createAdminScene() {
-
-        TableView<Product> table = new TableView<>();
-        table.setItems(products);
-
-        TableColumn<Product,String> n = new TableColumn<>("Name");
-        n.setCellValueFactory(new PropertyValueFactory<>("name"));
-
-        TableColumn<Product,Double> p = new TableColumn<>("Price");
-        p.setCellValueFactory(new PropertyValueFactory<>("price"));
-
-        table.getColumns().addAll(n,p);
-
-        TextField name = new TextField();
-        TextField price = new TextField();
-
-        Button add = new Button("Add");
-        Button delete = new Button("Delete");
-        Button back = new Button("Back");
-
-        add.setOnAction(e ->
-                products.add(new Product(name.getText(),"",Double.parseDouble(price.getText()))));
-
-        delete.setOnAction(e -> {
-            Product selected = table.getSelectionModel().getSelectedItem();
-            if (selected != null) products.remove(selected);
-        });
-
-        back.setOnAction(e -> primaryStage.setScene(homeScene));
-
-        VBox root = new VBox(10, table, name, price, add, delete, back);
-        adminScene = new Scene(root, 600, 400);
-    }
-
-    // ================= ORDER =================
-    private void placeOrder() {
-
-        if (cart.isEmpty()) return;
-
-        double total = cart.stream().mapToDouble(Product::getPrice).sum();
-
-        Order order = new Order(currentUser.getUsername(), new ArrayList<>(cart), total);
-
-        orders.add(order);
-        saveInvoice(order);
-        showInvoicePopup(order);
-
-        cart.clear();
-        updateTotal();
-
-        alert("Success", "Order placed!");
-    }
-
-    // ================= FILE I/O =================
-    // User: LAILA NAZ BINTI AZHAR - 2514660 - Handles invoice saving
-    private void saveInvoice(Order order) {
-
-        try (PrintWriter pw = new PrintWriter(new FileWriter("invoice.txt", true))) {
-
-            pw.println("Customer: " + order.getCustomer());
-            pw.println("Total: RM " + order.getTotal());
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    private void showInvoicePopup(Order order) {
-
-        Alert a = new Alert(Alert.AlertType.INFORMATION);
-        a.setContentText("Order Success! Total RM " + order.getTotal());
-        a.show();
-    }
-
-    private void viewOrderHistory() {
-        primaryStage.setScene(shopScene);
-    }
-
-    private void filter(String k, String c) {
-
-        filteredProducts.clear();
-
-        for (Product p : products) {
-            boolean ok = p.getName().toLowerCase().contains(k.toLowerCase());
-            boolean cat = c.equals("All") || p.getCategory().equals(c);
-
-            if (ok && cat) filteredProducts.add(p);
-        }
-    }
-
-    private void setupProducts() {
-        products.addAll(
-                new Product("Abaya","Abaya",120),
-                new Product("Hijab","Hijab",45),
-                new Product("Jubah","Jubah",150),
-                new Product("Bag","Accessory",60)
-        );
-    }
-
-    private void updateTotal() {
-        double t = cart.stream().mapToDouble(Product::getPrice).sum();
-        totalLabel.setText("Total: RM " + t);
-    }
-
-    private void alert(String t, String m) {
-        Alert a = new Alert(Alert.AlertType.INFORMATION);
-        a.setTitle(t);
-        a.setContentText(m);
-        a.show();
-    }
-}
+          // ================= ADMIN =================
+          private void createAdminScene() {
+              TableView<Product> table = new TableView<>();
+              table.setItems(products);
+              TableColumn<Product,String> n = new TableColumn<>("Name");
+              n.setCellValueFactory(new PropertyValueFactory<>("name"));
+              TableColumn<Product,Double> p = new TableColumn<>("Price");
+              p.setCellValueFactory(new PropertyValueFactory<>("price"));
+              table.getColumns().addAll(n,p);
+              TextField name = new TextField();
+              TextField price = new TextField();
+              Button add = new Button("Add");
+              Button delete = new Button("Delete");
+              Button back = new Button("Back");
+              add.setOnAction(e ->
+                      products.add(new Product(name.getText(),"",Double.parseDouble(price.getText()))));
+              delete.setOnAction(e -> {
+                  Product selected = table.getSelectionModel().getSelectedItem();
+                  if (selected != null) products.remove(selected);
+              });
+              back.setOnAction(e -> primaryStage.setScene(homeScene));
+              VBox root = new VBox(10, table, name, price, add, delete, back);
+              adminScene = new Scene(root, 600, 400);
+          }
+          // ================= ORDER =================
+          private void placeOrder() {
+          if (cart.isEmpty()) return;
+          double total = cart.stream().mapToDouble(Product::getPrice).sum();
+          Order order = new Order(
+                  currentUser.getUsername(),
+                  new ArrayList<>(cart),
+                  total
+          );
+          orders.add(order);
+        
+          saveInvoice(order);
+          
+          showInvoicePopup(order);
+          cart.clear();
+          updateTotal();
+          alert("Success", "Order placed!");
+      }
+          // ================= ORDER HISTORY =================
+          private void viewOrderHistory() {
+              ObservableList<Order> myOrders = FXCollections.observableArrayList();
+              for (Order o : orders) {
+                  if (o.getCustomer().equals(currentUser.getUsername())) {
+                      myOrders.add(o);
+                  }
+              }
+              TableView<Order> table = new TableView<>();
+              TableColumn<Order,String> c = new TableColumn<>("Customer");
+              c.setCellValueFactory(new PropertyValueFactory<>("customer"));
+              TableColumn<Order,Double> t = new TableColumn<>("Total");
+              t.setCellValueFactory(new PropertyValueFactory<>("total"));
+              table.getColumns().addAll(c,t);
+              table.setItems(myOrders);
+              Button back = new Button("Back");
+              back.setOnAction(e -> primaryStage.setScene(shopScene));
+              VBox root = new VBox(10, table, back);
+              primaryStage.setScene(new Scene(root,500,400));
+          }
+          // ================= FILTER =================
+          private void filter(String keyword, String cat) {
+              filteredProducts.clear();
+              for (Product p : products) {
+                  boolean okName = p.getName().toLowerCase().contains(keyword.toLowerCase());
+                  boolean okCat = cat.equals("All") || p.getCategory().equals(cat);
+                  if (okName && okCat) filteredProducts.add(p);
+              }
+          }
+          // ================= PRODUCTS =================
+          private void setupProducts() {
+              products.addAll(
+                      new Product("Abaya","Abaya",120),
+                      new Product("Hijab","Hijab",45),
+                      new Product("Jubah","Jubah",150),
+                      new Product("Bag","Accessory",60)
+              );
+          }
+          // ================= INVOICE (FULL DETAIL) =================
+      private void saveInvoice(Order order) {
+          try (PrintWriter pw = new PrintWriter(new FileWriter("invoice.txt", true))) {
+              pw.println("==================================");
+              pw.println("        HIJRAH FASHION HUB       ");
+              pw.println("==================================");
+              pw.println("Customer : " + order.getCustomer());
+              pw.println("\nItems:");
+              for (Product p : order.getItems()) {
+                  pw.println("- " + p.getName()
+                          + " (" + p.getCategory() + ")"
+                          + " RM " + p.getPrice());
+              }
+              pw.println("\nTOTAL: RM " + order.getTotal());
+              DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+              pw.println("Date: " + LocalDateTime.now().format(dtf));
+              pw.println("==================================\n");
+          } catch (Exception e) {
+              System.out.println("Invoice error: " + e.getMessage());
+          }
+      }
+      // ================= POPUP INVOICE =================
+      private void showInvoicePopup(Order order) {
+          StringBuilder items = new StringBuilder();
+          for (Product p : order.getItems()) {
+              items.append(p.getName())
+                      .append(" | ")
+                      .append(p.getCategory())
+                      .append(" | RM ")
+                      .append(p.getPrice())
+                      .append("\n");
+          }
+          DateTimeFormatter dtf =
+                  DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+          Label title = new Label("🧾 INVOICE RECEIPT");
+          title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+          Label customer = new Label("Customer: " + order.getCustomer());
+          Label itemList = new Label(items.toString());
+          Label total = new Label("TOTAL: RM " + order.getTotal());
+          Label date = new Label("Date: " + LocalDateTime.now().format(dtf));
+          Button close = new Button("Close");
+          VBox root = new VBox(10,
+                  title,
+                  customer,
+                  itemList,
+                  total,
+                  date,
+                  close
+          );
+          root.setPadding(new Insets(15));
+          root.setAlignment(Pos.CENTER);
+          Stage popup = new Stage();
+          popup.setTitle("Invoice");
+          popup.setScene(new Scene(root, 350, 400));
+          close.setOnAction(e -> popup.close());
+          popup.show();
+      }
+          // ================= TOTAL =================
+          private void updateTotal() {
+              double t = cart.stream().mapToDouble(Product::getPrice).sum();
+              totalLabel.setText("Total: RM " + t);
+          }
+          // ================= ALERT =================
+          private void alert(String t, String m) {
+              Alert a = new Alert(Alert.AlertType.INFORMATION);
+              a.setTitle(t);
+              a.setContentText(m);
+              a.show();
+          }
+      }
