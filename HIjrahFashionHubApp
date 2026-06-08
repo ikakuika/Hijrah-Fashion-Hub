@@ -216,7 +216,7 @@ public class HijrahFashionHubApp extends Application {
            registerScene = new Scene(grid, 700, 500);
        }
     // ================= HOME =================
-     private void createHomeScene() {
+      private void createHomeScene() {
         
         //make label
         Label welcome = new Label("Welcome");
