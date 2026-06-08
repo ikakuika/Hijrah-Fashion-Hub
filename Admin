@@ -1,4 +1,5 @@
 package javafxhijrahfashionhub;
+// User: SYAZANA IFFA ATHIRA BINTI SAHILAN -2513176- Abstraction & Inheritance module (User hierarchy storage)//
 
 public class Admin extends User {
 
