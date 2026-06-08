@@ -511,7 +511,7 @@ public class HijrahFashionHubApp extends Application {
           }
           DateTimeFormatter dtf =
                   DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-          Label title = new Label("🧾 INVOICE RECEIPT");
+          Label title = new Label(" INVOICE RECEIPT");
           title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
           Label customer = new Label("Customer: " + order.getCustomer());
           Label itemList = new Label(items.toString());
