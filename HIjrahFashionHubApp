@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.*;
 
 
-
 // User: SITI ZULAIKA BINTI JAUFARI - - Main JavaFX application handling UI navigation, cart system and order processing
 public class HijrahFashionHubApp extends Application {
 
@@ -263,69 +262,125 @@ public class HijrahFashionHubApp extends Application {
     }
 
     // ================= SHOP =================
-    private void createShopScene() {
+      
+      private void createShopScene() {
 
-        productTable = new TableView<>();
-        cartTable = new TableView<>();
+          productTable = new TableView<>();
+          cartTable = new TableView<>();
 
-        TableColumn<Product, String> nameCol = new TableColumn<>("Name");
-        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+          
+          TableColumn<Product, String> productNameCol =
+                  new TableColumn<>("Name");
+          productNameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-        TableColumn<Product, String> catCol = new TableColumn<>("Category");
-        catCol.setCellValueFactory(new PropertyValueFactory<>("category"));
+          TableColumn<Product, String> productCategoryCol =
+                  new TableColumn<>("Category");
+          productCategoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
 
-        TableColumn<Product, Double> priceCol = new TableColumn<>("Price");
-        priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
+          TableColumn<Product, Double> productPriceCol =
+                  new TableColumn<>("Price");
+          productPriceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
 
-        productTable.getColumns().addAll(nameCol, catCol, priceCol);
-        productTable.setItems(filteredProducts);
+          productTable.getColumns().addAll(
+                  productNameCol,
+                  productCategoryCol,
+                  productPriceCol
+          );
 
-        cartTable.getColumns().addAll(nameCol, catCol, priceCol);
-        cartTable.setItems(cart);
+          productTable.setItems(filteredProducts);
 
-        TextField search = new TextField();
-        ComboBox<String> category = new ComboBox<>();
-        category.getItems().addAll("All", "Abaya", "Hijab", "Jubah", "Accessory", "Set");
-        category.setValue("All");
+   
+          TableColumn<Product, String> cartNameCol =
+                  new TableColumn<>("Name");
+          cartNameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-        search.textProperty().addListener((a,b,c) -> filter(c, category.getValue()));
-        category.setOnAction(e -> filter(search.getText(), category.getValue()));
+          TableColumn<Product, String> cartCategoryCol =
+                  new TableColumn<>("Category");
+          cartCategoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
 
-        Button add = new Button("Add");
-        Button remove = new Button("Remove");
-        Button order = new Button("Place Order");
-        Button history = new Button("History");
-        Button back = new Button("Back");
+          TableColumn<Product, Double> cartPriceCol =
+                  new TableColumn<>("Price");
+          cartPriceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
 
-        add.setOnAction(e -> {
-            Product p = productTable.getSelectionModel().getSelectedItem();
-            if (p != null) {
-                cart.add(p);
-                updateTotal();
-            }
-        });
+          cartTable.getColumns().addAll(
+                  cartNameCol,
+                  cartCategoryCol,
+                  cartPriceCol
+          );
 
-        remove.setOnAction(e -> {
-            Product p = cartTable.getSelectionModel().getSelectedItem();
-            if (p != null) {
-                cart.remove(p);
-                updateTotal();
-            }
-        });
+          cartTable.setItems(cart);
 
-        order.setOnAction(e -> placeOrder());
-        history.setOnAction(e -> viewOrderHistory());
-        back.setOnAction(e -> primaryStage.setScene(homeScene));
+        
+          TextField search = new TextField();
+          search.setPromptText("Search product...");
 
-        VBox left = new VBox(10, search, category, productTable, add);
-        VBox right = new VBox(10, cartTable, remove, totalLabel, order, history, back);
+       
+          ComboBox<String> category = new ComboBox<>();
+          category.getItems().addAll(
+                  "All",
+                  "Abaya",
+                  "Hijab",
+                  "Jubah",
+                  "Accessory",
+                  "Set"
+          );
+          category.setValue("All");
 
-        HBox root = new HBox(20, left, right);
-        root.setPadding(new Insets(10));
-        root.setStyle("-fx-background-color: #FFD1DC;");
+          
+          search.textProperty().addListener((obs, oldVal, newVal) ->
+                  filter(newVal, category.getValue())
+          );
 
-        shopScene = new Scene(root, 900, 500);
-    }
+          category.setOnAction(e ->
+                  filter(search.getText(), category.getValue())
+          );
+
+          
+          Button add = new Button("Add");
+          Button remove = new Button("Remove");
+          Button back = new Button("Back");
+
+          add.setOnAction(e -> {
+              Product p = productTable.getSelectionModel().getSelectedItem();
+              if (p != null) {
+                  cart.add(p);
+                  updateTotal();
+              }
+          });
+
+          remove.setOnAction(e -> {
+              Product p = cartTable.getSelectionModel().getSelectedItem();
+              if (p != null) {
+                  cart.remove(p);
+                  updateTotal();
+              }
+          });
+
+          back.setOnAction(e -> primaryStage.setScene(homeScene));
+
+        
+          VBox left = new VBox(10,
+                  search,
+                  category,
+                  productTable,
+                  add
+          );
+
+          VBox right = new VBox(10,
+                  cartTable,
+                  remove,
+                  totalLabel,
+                  back
+          );
+
+          HBox root = new HBox(20, left, right);
+          root.setPadding(new Insets(10));
+
+
+          root.setStyle("-fx-background-color: #FFD1DC;");
+
+          shopScene = new Scene(root, 900, 500);
+      }
 
     // ================= ADMIN =================
     private void createAdminScene() {
