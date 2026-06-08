@@ -138,43 +138,82 @@ public class HijrahFashionHubApp extends Application {
     }
 
     // ================= REGISTER =================
-    private void createRegisterScene() {
+     private void createRegisterScene() {
 
-        TextField u = new TextField();
-        PasswordField p = new PasswordField();
+           TextField u = new TextField();
+           PasswordField p = new PasswordField();
 
-        ComboBox<String> role = new ComboBox<>();
-        role.getItems().addAll("Customer", "Admin");
-        role.setValue("Customer");
+           // make label
+           Label title = new Label("HIJRAH FASHION HUB REGISTER");
+           title.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: hotpink;");
 
-        // User: SITI ZULAIKA - User registration + role assignment
-        Button create = new Button("Create");
+           Label usernameLabel = new Label("Username:");
+           usernameLabel.setTextFill(Color.HOTPINK);
 
-        Button back = new Button("Back");
+           Label passwordLabel = new Label("Password:");
+           passwordLabel.setTextFill(Color.HOTPINK);
 
-        create.setOnAction(e -> {
-            String username = u.getText();
-            String password = p.getText();
+           Label roleLabel = new Label("Role:");
+           roleLabel.setTextFill(Color.HOTPINK);
 
-            if (username.isEmpty() || password.isEmpty()) return;
+           ComboBox<String> role = new ComboBox<>();
+           role.getItems().addAll("Customer", "Admin");
+           role.setValue("Customer");
 
-            if (role.getValue().equals("Admin")) {
-                userRegistry.put(username, new Admin(username, password));
-            } else {
-                userRegistry.put(username, new Customer(username, password));
-            }
+           Button create = new Button("Create");
+           Button back = new Button("Back");
 
-            primaryStage.setScene(loginScene);
-        });
+           // make button action
+           create.setOnAction(e -> {
+               String username = u.getText();
+               String password = p.getText();
 
-        back.setOnAction(e -> primaryStage.setScene(loginScene));
+               if (username.isEmpty() || password.isEmpty()) return;
 
-        VBox root = new VBox(10, u, p, role, create, back);
-        root.setAlignment(Pos.CENTER);
+               if (role.getValue().equals("Admin")) {
+                   userRegistry.put(username, new Admin(username, password));
+               } else {
+                   userRegistry.put(username, new Customer(username, password));
+               }
 
-        registerScene = new Scene(root, 400, 300);
-    }
+               primaryStage.setScene(loginScene);
+           });
 
+           back.setOnAction(e -> primaryStage.setScene(loginScene));
+
+           //make gridpane
+           GridPane grid = new GridPane();
+           grid.setAlignment(Pos.CENTER);
+           grid.setPadding(new Insets(20));
+           grid.setHgap(10);
+           grid.setVgap(10);
+
+           // make tittle
+           grid.add(title, 0, 0, 2, 1);
+           GridPane.setHalignment(title, javafx.geometry.HPos.CENTER);
+
+           grid.add(usernameLabel, 0, 1);
+           grid.add(u, 1, 1);
+
+           grid.add(passwordLabel, 0, 2);
+           grid.add(p, 1, 2);
+
+           grid.add(roleLabel, 0, 3);
+           grid.add(role, 1, 3);
+
+           grid.add(create, 0, 4);
+           grid.add(back, 1, 4);
+
+           GridPane.setHalignment(create, javafx.geometry.HPos.CENTER);
+           GridPane.setHalignment(back, javafx.geometry.HPos.CENTER);
+
+       
+           grid.setStyle(
+               "-fx-background-color: linear-gradient(to bottom, #ffe6f0, #ffd1dc);"
+           );
+
+           registerScene = new Scene(grid, 700, 500);
+       }
     // ================= HOME =================
     private void createHomeScene() {
 
