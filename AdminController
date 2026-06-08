@@ -10,6 +10,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+//USER: SITI ZULAIKA
 public class AdminController {
 
     // PRODUCT STORAGE
