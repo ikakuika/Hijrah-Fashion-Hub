@@ -160,10 +160,11 @@ public class HijrahFashionHubApp extends Application {
            role.getItems().addAll("Customer", "Admin");
            role.setValue("Customer");
 
+           // make button 
            Button create = new Button("Create");
            Button back = new Button("Back");
 
-           // make button action
+          
            create.setOnAction(e -> {
                String username = u.getText();
                String password = p.getText();
