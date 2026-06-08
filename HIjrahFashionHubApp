@@ -14,6 +14,9 @@
 package javafxhijrahfashionhub;
 
 import javafx.application.Application;
+import javafx.geometry.HPos;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.collections.*;
 import javafx.geometry.*;
 import javafx.scene.Scene;
@@ -21,11 +24,17 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.paint.Color;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.*;
+
 
 
 // User: SITI ZULAIKA BINTI JAUFARI - 2423064 - Main JavaFX application handling UI navigation, cart system and order processing
