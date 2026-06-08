@@ -36,8 +36,7 @@ import java.util.Map;
 import java.util.*;
 
 
-
-// User: SITI ZULAIKA BINTI JAUFARI - 2423064 - Main JavaFX application handling UI navigation, cart system and order processing
+// User: SITI ZULAIKA BINTI JAUFARI - - Main JavaFX application handling UI navigation, cart system and order processing
 public class HijrahFashionHubApp extends Application {
 
     private Stage primaryStage;
@@ -98,10 +97,14 @@ public class HijrahFashionHubApp extends Application {
         Label usernameLabel = new Label("Username:");
         usernameLabel.setTextFill(Color.HOTPINK);
       
+       
         //pasword label
         Label passwordLabel = new Label("Password:");
         passwordLabel.setTextFill(Color.HOTPINK);
-
+      
+        
+        
+        
         //make a button
         Button login = new Button("Login");
         Button register = new Button("Register");
@@ -147,7 +150,7 @@ public class HijrahFashionHubApp extends Application {
     }
 
     // ================= REGISTER =================
-     private void createRegisterScene() {
+        private void createRegisterScene() {
 
            TextField u = new TextField();
            PasswordField p = new PasswordField();
@@ -168,12 +171,12 @@ public class HijrahFashionHubApp extends Application {
            ComboBox<String> role = new ComboBox<>();
            role.getItems().addAll("Customer", "Admin");
            role.setValue("Customer");
-
+           
            // make button 
            Button create = new Button("Create");
            Button back = new Button("Back");
 
-          
+         
            create.setOnAction(e -> {
                String username = u.getText();
                String password = p.getText();
@@ -225,7 +228,7 @@ public class HijrahFashionHubApp extends Application {
            registerScene = new Scene(grid, 700, 500);
        }
     // ================= HOME =================
-      private void createHomeScene() {
+    private void createHomeScene() {
         
         //make label
         Label welcome = new Label("Welcome");
@@ -258,10 +261,9 @@ public class HijrahFashionHubApp extends Application {
         homeScene = new Scene(root, 400, 300);
     }
 
-
     // ================= SHOP =================
     private void createShopScene() {
-        
+
         productTable = new TableView<>();
         cartTable = new TableView<>();
 
@@ -280,7 +282,6 @@ public class HijrahFashionHubApp extends Application {
         cartTable.getColumns().addAll(nameCol, catCol, priceCol);
         cartTable.setItems(cart);
 
-        //make search
         TextField search = new TextField();
         ComboBox<String> category = new ComboBox<>();
         category.getItems().addAll("All", "Abaya", "Hijab", "Jubah", "Accessory", "Set");
@@ -289,7 +290,6 @@ public class HijrahFashionHubApp extends Application {
         search.textProperty().addListener((a,b,c) -> filter(c, category.getValue()));
         category.setOnAction(e -> filter(search.getText(), category.getValue()));
 
-        //make button
         Button add = new Button("Add");
         Button remove = new Button("Remove");
         Button order = new Button("Place Order");
@@ -343,7 +343,6 @@ public class HijrahFashionHubApp extends Application {
         TextField name = new TextField();
         TextField price = new TextField();
 
-        //make button
         Button add = new Button("Add");
         Button delete = new Button("Delete");
         Button back = new Button("Back");
@@ -359,7 +358,6 @@ public class HijrahFashionHubApp extends Application {
         back.setOnAction(e -> primaryStage.setScene(homeScene));
 
         VBox root = new VBox(10, table, name, price, add, delete, back);
-        root.setStyle("-fx-background-color: #FFD1DC;");
         adminScene = new Scene(root, 600, 400);
     }
 
