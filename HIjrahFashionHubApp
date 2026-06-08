@@ -216,10 +216,14 @@ public class HijrahFashionHubApp extends Application {
            registerScene = new Scene(grid, 700, 500);
        }
     // ================= HOME =================
-    private void createHomeScene() {
-
+     private void createHomeScene() {
+        
+        //make label
         Label welcome = new Label("Welcome");
+        welcome.setFont(Font.font("Arial Rounded MT Bold", FontWeight.BOLD, 30));
+        welcome.setTextFill(Color.HOTPINK);
 
+        //make button
         Button shop = new Button("Customer Shop");
         Button admin = new Button("Admin Panel");
         Button logout = new Button("Logout");
@@ -236,12 +240,15 @@ public class HijrahFashionHubApp extends Application {
         });
 
         logout.setOnAction(e -> primaryStage.setScene(loginScene));
-
+        
+        //makevbox
         VBox root = new VBox(10, welcome, shop, admin, logout);
         root.setAlignment(Pos.CENTER);
+        root.setStyle("-fx-background-color: #FFD1DC;");
 
         homeScene = new Scene(root, 400, 300);
     }
+
 
     // ================= SHOP =================
     private void createShopScene() {
