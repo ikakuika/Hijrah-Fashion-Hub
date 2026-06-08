@@ -362,7 +362,7 @@ public class HijrahFashionHubApp extends Application {
             history.setOnAction(e -> viewOrderHistory());
             back.setOnAction(e -> primaryStage.setScene(homeScene));
 
-            // ================= LAYOUT =================
+           
             productTable.setPrefWidth(450);
             cartTable.setPrefWidth(350);
 
@@ -389,6 +389,8 @@ public class HijrahFashionHubApp extends Application {
             );
 
             HBox root = new HBox(20, left, right);
+            root.setStyle("-fx-background-color: #FFD1DC;");
+
             root.setPadding(new Insets(10));
 
             shopScene = new Scene(root, 900, 500);
@@ -415,6 +417,8 @@ public class HijrahFashionHubApp extends Application {
               });
               back.setOnAction(e -> primaryStage.setScene(homeScene));
               VBox root = new VBox(10, table, name, price, add, delete, back);
+                root.setStyle("-fx-background-color: #FFD1DC;");
+
               adminScene = new Scene(root, 600, 400);
           }
           // ================= ORDER =================
