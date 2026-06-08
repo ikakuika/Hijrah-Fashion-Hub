@@ -10,7 +10,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
-//USER: SITI ZULAIKA
+//USER: SITI ZULAIKA  AdminController (JavaFX UI + Product CRUD Management)
 public class AdminController {
 
     // PRODUCT STORAGE
@@ -20,7 +20,7 @@ public class AdminController {
 
     public void start(Stage stage) {
 
-        // ================= INPUT FIELDS =================
+        // make input field
         TextField nameField = new TextField();
         nameField.setPromptText("Product Name");
 
@@ -30,15 +30,15 @@ public class AdminController {
         TextField priceField = new TextField();
         priceField.setPromptText("Price");
 
-        // ================= BUTTONS =================
+        // make buttons
         Button addProduct = new Button("Add Product");
         Button editProduct = new Button("Edit Product");
         Button deleteProduct = new Button("Delete Product");
 
-        // ================= TABLE =================
+        // make table
         setupTable();
 
-        // ================= ADD PRODUCT =================
+        //add product
         addProduct.setOnAction(e -> {
 
             try {
@@ -62,7 +62,7 @@ public class AdminController {
             }
         });
 
-        // ================= DELETE PRODUCT =================
+        //delete product
         deleteProduct.setOnAction(e -> {
             Product selected = table.getSelectionModel().getSelectedItem();
             if (selected != null) {
@@ -70,7 +70,7 @@ public class AdminController {
             }
         });
 
-        // ================= EDIT PRODUCT =================
+        // edit product
         editProduct.setOnAction(e -> {
 
             Product selected = table.getSelectionModel().getSelectedItem();
@@ -84,7 +84,7 @@ public class AdminController {
             }
         });
 
-        // ================= LAYOUT =================
+        //make vbox
         VBox form = new VBox(10,
                 new Label("ADD / EDIT PRODUCT"),
                 nameField,
@@ -107,7 +107,7 @@ public class AdminController {
         stage.show();
     }
 
-    // ================= TABLE SETUP =================
+    // make a table setup
     private void setupTable() {
 
         TableColumn<Product, String> nameCol = new TableColumn<>("Name");
@@ -123,7 +123,7 @@ public class AdminController {
         table.setItems(products);
     }
 
-    // ================= ALERT =================
+    // make alert
     private void showAlert(String title, String msg) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
