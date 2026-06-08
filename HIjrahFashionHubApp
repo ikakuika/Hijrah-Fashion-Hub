@@ -76,10 +76,24 @@ public class HijrahFashionHubApp extends Application {
 
     // ================= LOGIN =================
     private void createLoginScene() {
-
+        
+        //make a login label first in a cluster so its easier to diffrentiate between button
         TextField u = new TextField();
         PasswordField p = new PasswordField();
+        
+        //login lable
+        Label loginLabel = new Label("HIJRAH FASHION HUB LOGIN");
+        loginLabel.setFont(Font.font("Arial Rounded MT Bold", FontWeight.BOLD, 40));
+        loginLabel.setTextFill(Color.HOTPINK);
+        //username label
+        Label usernameLabel = new Label("Username:");
+        usernameLabel.setTextFill(Color.HOTPINK);
+      
+        //pasword label
+        Label passwordLabel = new Label("Password:");
+        passwordLabel.setTextFill(Color.HOTPINK);
 
+        //make a button
         Button login = new Button("Login");
         Button register = new Button("Register");
 
@@ -97,11 +111,30 @@ public class HijrahFashionHubApp extends Application {
         });
 
         register.setOnAction(e -> primaryStage.setScene(registerScene));
-
-        VBox root = new VBox(10, new Label("LOGIN"), u, p, login, register);
+        
+        //make vbox
+        VBox root = new VBox(10);
+        root.setPadding(new Insets(20));
         root.setAlignment(Pos.CENTER);
-
-        loginScene = new Scene(root, 400, 300);
+        loginScene = new Scene(root, 700, 500);
+        
+        //make gridpane
+     
+        GridPane gridPane = new GridPane();
+        gridPane.add(login, 0, 3);
+        gridPane.add(register, 1, 3);
+        gridPane.setAlignment(Pos.CENTER);
+        gridPane.setPadding(new Insets(20));
+        gridPane.setVgap(10);
+        gridPane.setHgap(10);
+        gridPane.add(loginLabel, 0, 0, 2, 1);
+        GridPane.setHalignment(loginLabel, HPos.CENTER);
+        gridPane.add(usernameLabel, 0, 1);
+        gridPane.add(u, 1, 1);
+        gridPane.add(passwordLabel, 0, 2);
+        gridPane.add(p, 1, 2);
+        gridPane.setStyle("-fx-background-color: #FFDDEB;");
+        loginScene = new Scene(gridPane, 700, 500);
     }
 
     // ================= REGISTER =================
