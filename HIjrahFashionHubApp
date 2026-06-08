@@ -252,7 +252,7 @@ public class HijrahFashionHubApp extends Application {
 
     // ================= SHOP =================
     private void createShopScene() {
-
+        
         productTable = new TableView<>();
         cartTable = new TableView<>();
 
@@ -271,6 +271,7 @@ public class HijrahFashionHubApp extends Application {
         cartTable.getColumns().addAll(nameCol, catCol, priceCol);
         cartTable.setItems(cart);
 
+        //make search
         TextField search = new TextField();
         ComboBox<String> category = new ComboBox<>();
         category.getItems().addAll("All", "Abaya", "Hijab", "Jubah", "Accessory", "Set");
@@ -279,6 +280,7 @@ public class HijrahFashionHubApp extends Application {
         search.textProperty().addListener((a,b,c) -> filter(c, category.getValue()));
         category.setOnAction(e -> filter(search.getText(), category.getValue()));
 
+        //make button
         Button add = new Button("Add");
         Button remove = new Button("Remove");
         Button order = new Button("Place Order");
@@ -310,6 +312,7 @@ public class HijrahFashionHubApp extends Application {
 
         HBox root = new HBox(20, left, right);
         root.setPadding(new Insets(10));
+        root.setStyle("-fx-background-color: #FFD1DC;");
 
         shopScene = new Scene(root, 900, 500);
     }
@@ -331,6 +334,7 @@ public class HijrahFashionHubApp extends Application {
         TextField name = new TextField();
         TextField price = new TextField();
 
+        //make button
         Button add = new Button("Add");
         Button delete = new Button("Delete");
         Button back = new Button("Back");
@@ -346,6 +350,7 @@ public class HijrahFashionHubApp extends Application {
         back.setOnAction(e -> primaryStage.setScene(homeScene));
 
         VBox root = new VBox(10, table, name, price, add, delete, back);
+        root.setStyle("-fx-background-color: #FFD1DC;");
         adminScene = new Scene(root, 600, 400);
     }
 
